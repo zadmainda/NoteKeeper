@@ -1,6 +1,7 @@
 package com.kinara.notekeeper;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,17 +28,18 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int position) {
         View itemView = mLayoutInflater.inflate(R.layout.item_note_list, viewGroup, false);
         return new ViewHolder(itemView);
         // THIS FUNCTION differs from the one on the tutorial: Binding DATA to Recycler view > View Management with a recycler view 5m 3s
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {  //int i differs from tutorial's position
-        NoteInfo note = mNotes.get(i);
+    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {  //int i differs from tutorial's position
+        NoteInfo note = mNotes.get(position);
         viewHolder.mTextCourse.setText(note.getCourse().getTitle());
         viewHolder.mTextTitle.setText(note.getTitle());
+        viewHolder.mCurrentPosition = position;
     }
 
     @Override
@@ -49,11 +51,21 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
 
         public final TextView mTextCourse;
         public final TextView mTextTitle;
+        public int mCurrentPosition;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             mTextCourse = (TextView) itemView.findViewById(R.id.text_course);
             mTextTitle = (TextView) itemView.findViewById(R.id.text_title);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent (mContext, NoteActivity.class);
+                    intent.putExtra(NoteActivity.NOTE_POSITION, mCurrentPosition);
+                    mContext.startActivity(intent);
+                }
+            });
         }
     }
 }
