@@ -3,6 +3,7 @@ package com.kinara.notekeeper;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,11 +19,12 @@ import com.kinara.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
-    public static final String NOTE_POSITION = "com.kinara.notekeeper.NOTE_POSITION";
+    private final String TAG = getClass().getSimpleName();
+    public static final String NOTE_ID = "com.kinara.notekeeper.NOTE_ID";
     public static final String ORIGINAL_NOTE_COURSE_ID = "com.kinara.notekeeper.ORIGINAL_NOTE_COURSE_ID";
     public static final String ORIGINAL_NOTE_TITLE = "com.kinara.notekeeper.ORIGINAL_NOTE_TITLE";
     public static final String ORIGINAL_NOTE_TEXT = "com.kinara.notekeeper.ORIGINAL_NOTE_TEXT";
-    public static final int POSITION_NOT_SET = -1;
+    public static final int ID_NOT_SET = -1;
     private NoteInfo mNote;
     private boolean mIsNewNote;
     private Spinner mSpinnerCourses;
@@ -38,6 +40,7 @@ public class NoteActivity extends AppCompatActivity {
     private int mCourseIdPos;
     private int mNoteTitlePos;
     private int mNoteTextPos;
+    private int mNoteId;
 
     @Override
     protected void onDestroy() {
@@ -74,7 +77,7 @@ public class NoteActivity extends AppCompatActivity {
 
         if(!mIsNewNote)
             loadNoteData();
-//        Log.d(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
 
     }
 
@@ -84,9 +87,9 @@ public class NoteActivity extends AppCompatActivity {
         String courseId = "android_intents";
         String titleStart = "dynamic";
 
-        String selection = NoteInfoEntry.COLUMN_COURSE_ID + " = ? AND " +
-                NoteInfoEntry.COLUMN_NOTE_TITLE + " LIKE ?";
-        String[] selectionArgs = {courseId, titleStart + "%"};
+        String selection = NoteInfoEntry._ID + " = ?" ;
+
+        String[] selectionArgs = {Integer.toString(mNoteId)};
 
         String [] noteColumns = {
                 NoteInfoEntry.COLUMN_COURSE_ID,
@@ -170,13 +173,15 @@ public class NoteActivity extends AppCompatActivity {
 
     private void readDisplayStateValues() {
         Intent intent = getIntent();
-        int position = intent.getIntExtra(NOTE_POSITION, POSITION_NOT_SET);
-        mIsNewNote = position == POSITION_NOT_SET;
+        mNoteId = intent.getIntExtra(NOTE_ID, ID_NOT_SET);
+        mIsNewNote = mNoteId == ID_NOT_SET;
         if(mIsNewNote) {
             createNewNote();
-        } else {
-            mNote = DataManager.getInstance().getNotes().get(position);
         }
+
+            Log.i(TAG, "mNoteId: " + mNoteId);
+            mNote = DataManager.getInstance().getNotes().get(mNoteId);
+
     }
 
     private void createNewNote() {
